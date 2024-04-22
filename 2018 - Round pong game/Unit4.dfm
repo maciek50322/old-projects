@@ -1,0 +1,87 @@
+object Form4: TForm4
+  Left = 494
+  Top = 269
+  BorderStyle = bsDialog
+  Caption = 'Speed'
+  ClientHeight = 190
+  ClientWidth = 280
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -30
+  Font.Name = 'Arial'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnCreate = FormCreate
+  PixelsPerInch = 120
+  TextHeight = 35
+  object Shape1: TShape
+    Left = 110
+    Top = 20
+    Width = 150
+    Height = 150
+    Brush.Style = bsClear
+    Pen.Style = psDashDot
+    Shape = stCircle
+  end
+  object Shape2: TShape
+    Left = 177
+    Top = 12
+    Width = 15
+    Height = 15
+    Brush.Color = clSilver
+    Shape = stCircle
+  end
+  object Shape3: TShape
+    Left = 172
+    Top = 80
+    Width = 25
+    Height = 25
+    Brush.Color = clGray
+    Shape = stCircle
+  end
+  object TrackBar1: TTrackBar
+    Left = 10
+    Top = 20
+    Width = 34
+    Height = 150
+    Max = 9
+    Min = 1
+    Orientation = trVertical
+    Frequency = 1
+    Position = 5
+    SelEnd = 0
+    SelStart = 0
+    TabOrder = 0
+    ThumbLength = 16
+    TickMarks = tmBoth
+    TickStyle = tsAuto
+    OnChange = TrackBar1Change
+  end
+  object TrackBar2: TTrackBar
+    Left = 50
+    Top = 20
+    Width = 34
+    Height = 150
+    Max = 9
+    Min = 1
+    Orientation = trVertical
+    Frequency = 1
+    Position = 5
+    SelEnd = 0
+    SelStart = 0
+    TabOrder = 1
+    ThumbLength = 16
+    TickMarks = tmBoth
+    TickStyle = tsAuto
+    OnChange = TrackBar2Change
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 15
+    OnTimer = Timer1Timer
+    Left = 96
+    Top = 8
+  end
+end

@@ -1,0 +1,490 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#include <math.h>
+#pragma hdrstop
+
+#include "Unit1.h"
+#include "Unit2.h"
+#include "Unit3.h"
+#include "Unit4.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TForm1 *Form1;
+
+long double h1, h2;
+int lr1, lr2, leftpoints, rightpoints, gamemode=2;
+bool turn;
+WORD lu, ld, ru, rd;
+const long double pi=3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798;
+
+//---------------------------------------------------------------------------
+__fastcall TForm1::TForm1(TComponent* Owner)
+        : TForm(Owner)
+{
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FormKeyDown(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+        if (gamemode>0) {
+                if (gamemode==2) {
+                        if (Key==lu || Key==ld) {
+                                if (Key==lu)
+                                        lr1=-1;
+                                else lr1=1;
+                        Timer1->Enabled=true;
+                        }
+                }
+                if (Key==ru || Key==rd) {
+                        if (Key==ru)
+                                lr2=-1;
+                        else lr2=1;
+                        Timer2->Enabled=true;
+                }
+        }
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm1::Timer1Timer(TObject *Sender)
+{
+        pos1+=speedthing*lr1;
+        if (pos1<0) pos1=pi*2+pos1;
+        if (pos1>2*pi) pos1=pos1-pi*2;
+        Shape2->Left=Shape1->Width/2+Shape1->Left-Shape2->Width/2-cos(pos1)*Shape1->Width/2;
+        Shape2->Top=Shape1->Height/2+Shape1->Top-Shape2->Height/2-sin(pos1)*Shape1->Height/2;
+
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::Timer2Timer(TObject *Sender)
+{
+        pos2+=speedthing*lr2;
+        if (pos2<0) pos2=pi*2+pos2;
+        if (pos2>=2*pi) pos2=pos2-pi*2;
+        Shape3->Left=Shape1->Width/2+Shape1->Left-Shape3->Width/2-cos(pos2)*Shape1->Width/2;
+        Shape3->Top=Shape1->Height/2+Shape1->Top-Shape3->Height/2-sin(pos2)*Shape1->Height/2;
+}
+//---------------------------------------------------------------------------
+
+
+
+void __fastcall TForm1::FormKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+
+        if (gamemode>0) {
+                if (gamemode==2){
+                        if ((Key==ld && lr1==1) || (Key==lu && lr1==-1)) {
+                                Timer1->Enabled=false;
+                                lr1=0;
+                        }
+                }
+                if ((Key==ru && lr2==-1) || (Key==rd && lr2==1)) {
+                        Timer2->Enabled=false;
+                        lr2=0;
+                }
+        }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FormCreate(TObject *Sender)
+{
+DoubleBuffered = true;
+        speedthing=pi/100;
+        ppc=4;
+        pos1=0;
+        pos2=pi;
+        h1=-ppc;
+        h2=0;
+        turn=0;
+        px=Shape1->Width/2;
+        py=Shape1->Height/2;
+        lu=90; ld=88; ru=37; rd=39;
+        lr1=0;
+        lr2=0;
+        double cosx=1-(double)(pow(Shape2->Width/2, 2)/(2*pow(Shape1->Width/2, 2)));
+        att=atan( sqrt(1-pow(cosx, 2))/cosx )*3/4;
+}
+//---------------------------------------------------------------------------
+
+double abs(double x) {
+        return x<0 ? -x : x;
+}
+
+int timelaps;
+void __fastcall TForm1::Timer3Timer(TObject *Sender)
+{
+        if ((turn==0 && (pow(px-Shape2->Left+Shape1->Left-Shape2->Width/2, 2)+pow(py-Shape2->Top+Shape1->Top-Shape2->Height/2, 2)<=pow(Shape4->Width/2+Shape2->Width/2+3, 2))) ||
+            (turn==1 && (pow(px-Shape3->Left+Shape1->Left-Shape3->Width/2, 2)+pow(py-Shape3->Top+Shape1->Top-Shape3->Height/2, 2)<=pow(Shape4->Width/2+Shape3->Width/2+3, 2)))) {
+                turn=!turn;
+                if (turn) {
+                        Shape4->Brush->Color=clNavy;
+                        Shape4->Pen->Color=clBlue;
+
+                        h1=ppc*(px-Shape2->Left+Shape1->Left-Shape2->Width/2)/sqrt(pow(px-Shape2->Left+Shape1->Left-Shape2->Width/2,2)+pow(py-Shape2->Top+Shape1->Top-Shape2->Height/2, 2));
+                        h2=ppc*(py-Shape2->Top+Shape1->Top-Shape2->Height/2)/sqrt(pow(px-Shape2->Left+Shape1->Left-Shape2->Width/2,2)+pow(py-Shape2->Top+Shape1->Top-Shape2->Height/2, 2));
+
+                        if (gamemode<2) {
+                                tar2=2*atan( h2/h1 )-atan( (py-Shape1->Height/2)/(px-Shape1->Width/2) );
+                                if (px-Shape1->Width/2<0) tar2+=pi;
+                                if (tar2+att<0) tar2+=2*pi;
+                                if (tar2+att>=pi*2) tar2-=pi*2;
+                                tar1=tar2+pi;
+                                if (tar1+att<0) tar1+=2*pi;
+                                if (tar1+att>=pi*2) tar1-=pi*2;
+
+                                odl=sqrt( 2*pow(Shape1->Width/2-Shape4->Width/2-Shape3->Width/2,2)*(1- cos( abs(tar2-pos1) )) )/ppc;
+
+                        }
+
+                } else {
+                        Shape4->Brush->Color=(TColor)0x0000D7D7;
+                        Shape4->Pen->Color=clYellow;
+
+                        h1=ppc*(px-Shape3->Left+Shape1->Left-Shape3->Width/2)/sqrt(pow(px-Shape3->Left+Shape1->Left-Shape3->Width/2,2)+pow(py-Shape3->Top+Shape1->Top-Shape3->Height/2, 2));
+                        h2=ppc*(py-Shape3->Top+Shape1->Top-Shape3->Height/2)/sqrt(pow(px-Shape3->Left+Shape1->Left-Shape3->Width/2,2)+pow(py-Shape3->Top+Shape1->Top-Shape3->Height/2, 2));
+
+                        if (gamemode<2) {
+                                tar1=2*atan( h2/h1 )-atan( (py-Shape1->Height/2)/(px-Shape1->Width/2) );
+                                if (px-Shape1->Width/2<0) tar1+=pi;
+                                if (tar1+att<0) tar1+=2*pi;
+                                if (tar1+att>=pi*2) tar1-=pi*2;
+                                tar2=tar1-pi;
+                                if (tar2+att<0) tar2+=2*pi;
+                                if (tar2+att>=pi*2) tar2-=pi*2;
+
+                                odl=sqrt( 2*pow(Shape1->Width/2-Shape4->Width/2-Shape2->Width/2,2)*(1- cos( abs(tar1-pos2) )) )/ppc;
+
+                        }
+                }
+            }
+        px+=h1;
+        py+=h2;
+        Shape4->Left=px+Shape1->Left-Shape4->Width/2;
+        Shape4->Top=py+Shape1->Top-Shape4->Height/2;
+        if (pow(px-Shape1->Width/2, 2)+pow(py-Shape1->Height/2, 2)>pow(Shape1->Width/2-Shape4->Width/2, 2)) {
+                if (turn) leftpoints++;
+                else rightpoints++;
+                Label2->Caption=leftpoints;
+                Label2->Caption=Label2->Caption+" :";
+                Label3->Caption=rightpoints;
+
+                timelaps=0;
+                Timer1->Enabled=false;
+                Timer2->Enabled=false;
+                Timer4->Enabled=true;
+                Timer3->Enabled=false;
+        }
+
+
+        if (gamemode<2) {
+                if (odl>0) odl--;
+
+                if (!turn) {
+                        if ( (pos2>pos1 && pos2<pos1+pi) ||
+                             (pos2<pos1 && pos2<pos1-pi) )
+                                att=abs(att);
+                        else att=-abs(att);
+                        if (tar1+att<0) tar1+=2*pi;
+                        if (tar1+att>=pi*2) tar1-=pi*2;
+                }
+                if (odl<=20 && odl>0 && turn) {
+                        tar1=2*atan( (py+h2*(odl+0)-Shape3->Top+Shape1->Top-Shape3->Height/2)
+                                      /(px+h1*(odl+0)-Shape3->Left+Shape1->Left-Shape3->Width/2))
+                                      -atan( (py+h2*(odl+0)-Shape1->Height/2)/(px+h1*(odl+0)-Shape1->Width/2) );
+                        if (px+h1*(odl+0)-Shape1->Width/2<0) tar1+=pi;
+                        if (tar1+att<0) tar1+=2*pi;
+                        if (tar1+att>=pi*2) tar1-=pi*2;
+                }
+                if (abs(tar1-pos1+att)<speedthing) {
+                        lr1=0;
+                        Timer1->Enabled=false;
+                } else Timer1->Enabled=true;
+
+                        if ( (tar1+att<pos1+pi && tar1+att>pos1) ||
+                        (tar1+att<pos1-pi && tar1+att<pos1) )
+                                lr1=1;
+                        else lr1=-1;
+
+
+                if (gamemode==0) {
+
+                        if (turn) {
+                                if ( (pos1>pos2 && pos1<pos2+pi) ||
+                                        (pos1<pos2 && pos1<pos2-pi) )
+                                        att=abs(att);
+                                else att=-abs(att);
+                                if (tar2+att<0) tar2+=2*pi;
+                                if (tar2+att>=pi*2) tar2-=pi*2;
+                        }
+                        if (odl<=20 && odl>0 && !turn) {
+                                tar2=2*atan( (py+h2*(odl+0)-Shape2->Top+Shape1->Top-Shape2->Height/2)
+                                        /(px+h1*(odl+0)-Shape2->Left+Shape1->Left-Shape2->Width/2))
+                                        -atan( (py+h2*(odl+0)-Shape1->Height/2)/(px+h1*(odl+0)-Shape1->Width/2) );
+                                if (px+h1*(odl+0)-Shape1->Width/2<0) tar2-=pi;
+                                if (tar2+att<0) tar2+=2*pi;
+                                if (tar2+att>=pi*2) tar2-=pi*2;
+
+                        }
+                        if (abs(tar2+att-pos2)<speedthing) {
+                                lr2=0;
+                                Timer2->Enabled=false;
+                         } else Timer2->Enabled=true;
+
+                                if ( (tar2+att<pos2+pi && tar2+att>pos2) ||
+                                (tar2+att<pos2-pi && tar2+att<pos2) )
+                                        lr2=1;
+                                else lr2=-1;
+
+                }
+                if (Timer4->Enabled) {
+                        lr1=0;
+                        lr2=0;
+                }
+        }
+}
+//---------------------------------------------------------------------------
+
+
+
+void __fastcall TForm1::Timer4Timer(TObject *Sender)
+{
+        if (timelaps<5) {
+                Shape4->Visible=timelaps%2;
+        } else if (timelaps<6) {
+                Shape4->Left=Shape1->Width/2+Shape1->Left-Shape4->Width/2;
+                Shape4->Top=Shape1->Height/2+Shape1->Top-Shape4->Height/2;
+                px=Shape1->Width/2;
+                py=Shape1->Height/2;
+                if (!turn) h1=-ppc;
+                else h1=ppc;
+                h2=0;
+                pos1=0;
+                pos2=pi;
+                Shape3->Left=Shape1->Left+Shape1->Width-Shape3->Width/2;
+                Shape3->Top=Shape1->Top+Shape1->Height/2-Shape3->Height/2;
+                Shape2->Left=Shape1->Left-Shape2->Width/2;
+                Shape2->Top=Shape1->Top+Shape1->Height/2-Shape2->Height/2;
+                odl=(Shape1->Width/2-Shape4->Width/2-Shape3->Width/2)/ppc;
+        }
+        if (timelaps<10) {
+                Shape4->Visible=timelaps%2;
+        } else if (timelaps>11){
+                tar1=0;
+                tar2=pi;
+                Timer3->Enabled=true;
+                Timer4->Enabled=false;
+
+        }
+        timelaps++;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Button1Click(TObject *Sender)
+{
+        timelaps=5;
+        Timer4->Enabled=true;
+        Button1->Visible=false;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Exit1Click(TObject *Sender)
+{
+        Close();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Restart1Click(TObject *Sender)
+{
+                leftpoints=0;
+                rightpoints=0;
+                Label2->Caption="0 :";
+                Label3->Caption="0";
+                Timer1->Enabled=false;
+                Timer2->Enabled=false;
+                Timer3->Enabled=false;
+                Timer4->Enabled=false;
+                Button1->Visible=true;
+                lr1=0;
+                lr2=0;
+}
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm1::Stolenimage11Click(TObject *Sender)
+{
+        Image1->Visible=true;
+        Shape1->Pen->Color=clPurple;
+        Image1->Picture->LoadFromFile("Stolen image 1.bmp");
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Stolenimage21Click(TObject *Sender)
+{
+        Image1->Visible=true;
+        Shape1->Pen->Color=clWhite;
+        Image1->Picture->LoadFromFile("Stolen image 2.bmp");
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::None1Click(TObject *Sender)
+{
+        Shape1->Pen->Color=clBlack;
+        Image1->Visible=false;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Stolenimage31Click(TObject *Sender)
+{
+        Image1->Visible=true;
+        Shape1->Pen->Color=clWhite;
+        Image1->Picture->LoadFromFile("Stolen image 3.bmp");
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Stolenimage41Click(TObject *Sender)
+{
+        Image1->Visible=true;
+        Shape1->Pen->Color=clFuchsia;
+        Image1->Picture->LoadFromFile("Stolen image 4.bmp");
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Controls1Click(TObject *Sender)
+{
+        bool a=Timer3->Enabled, b=Timer4->Enabled;
+        Timer1->Enabled=false;
+        Timer2->Enabled=false;
+        Timer3->Enabled=false;
+        Timer4->Enabled=false;
+        Form2->Position=poMainFormCenter;
+        Form2->ShowModal();
+        Timer3->Enabled=a;
+        Timer4->Enabled=b;
+}
+//---------------------------------------------------------------------------
+void TForm1::SetControls(WORD s1, WORD s2, WORD s3, WORD s4) {
+        lu=s1;
+        ld=s2;
+        ru=s3;
+        rd=s4;
+}
+void __fastcall TForm1::N0Players1Click(TObject *Sender)
+{
+        gamemode=0;
+                Timer1->Enabled=false;
+                Timer2->Enabled=false;
+                Timer3->Enabled=false;
+                Timer4->Enabled=false;
+                leftpoints=0;
+                rightpoints=0;
+                Label2->Caption="0 :";
+                Label3->Caption="0";
+                Timer4->Enabled=false;
+                Timer3->Enabled=false;
+                Button1->Visible=true;
+                Form2->Label5->Height=110;
+        N0Players1->Enabled=false;
+        N1Player1->Enabled=true;
+        N2Players1->Enabled=true;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::N1Player1Click(TObject *Sender)
+{
+        gamemode=1;
+                Timer1->Enabled=false;
+                Timer2->Enabled=false;
+                Timer3->Enabled=false;
+                Timer4->Enabled=false;
+                leftpoints=0;
+                rightpoints=0;
+                Label2->Caption="0 :";
+                Label3->Caption="0";
+                Timer4->Enabled=false;
+                Timer3->Enabled=false;
+                Button1->Visible=true;
+        Form2->Label5->Height=45;
+        N0Players1->Enabled=true;
+        N1Player1->Enabled=false;
+        N2Players1->Enabled=true;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::N2Players1Click(TObject *Sender)
+{
+        gamemode=2;
+                Timer1->Enabled=false;
+                Timer2->Enabled=false;
+                Timer3->Enabled=false;
+                Timer4->Enabled=false;
+                leftpoints=0;
+                rightpoints=0;
+                Label2->Caption="0 :";
+                Label3->Caption="0";
+                Timer4->Enabled=false;
+                Timer3->Enabled=false;
+                Button1->Visible=true;
+        Form2->Label5->Height=0;
+        N0Players1->Enabled=true;
+        N1Player1->Enabled=true;
+        N2Players1->Enabled=false;
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm1::Size1Click(TObject *Sender)
+{
+        bool a=Timer3->Enabled, b=Timer4->Enabled;
+        Timer1->Enabled=false;
+        Timer2->Enabled=false;
+        Timer3->Enabled=false;
+        Timer4->Enabled=false;
+        Form3->Position=poMainFormCenter;
+        Form3->Shape4->Pen=Shape4->Pen;
+        Form3->Shape4->Brush=Shape4->Brush;
+        Form3->ShowModal();
+        double cosx=1-(double)(pow(Shape2->Width/2, 2)/(2*pow(Shape1->Width/2, 2)));
+        att=atan( sqrt(1-pow(cosx, 2))/cosx )*3/4;
+        Timer3->Enabled=a;
+        Timer4->Enabled=b;
+
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm1::Timer5Timer(TObject *Sender)
+{
+        Label2->Caption=Label2->Caption+1;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Speed1Click(TObject *Sender)
+{
+        Form4->Timer1->Enabled=true;
+        Form4->Position=poMainFormCenter;
+        bool a=Timer3->Enabled, b=Timer4->Enabled;
+        Timer1->Enabled=false;
+        Timer2->Enabled=false;
+        Timer3->Enabled=false;
+        Timer4->Enabled=false;
+        h1/=ppc;
+        h2/=ppc;
+        odl*=ppc;
+        Form4->ShowModal();
+        Form4->Timer1->Enabled=false;
+        h1*=ppc;
+        h2*=ppc;
+        odl/=ppc;
+        Timer3->Enabled=a;
+        Timer4->Enabled=b;
+
+
+}
+//---------------------------------------------------------------------------
+

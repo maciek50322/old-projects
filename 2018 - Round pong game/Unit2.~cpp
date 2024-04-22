@@ -1,0 +1,129 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "Unit2.h"
+#include "Unit1.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TForm2 *Form2;
+WORD lu=90, ld=88, ru=37, rd=39;
+AnsiString inc, pre;
+int chn=0;
+
+void TForm2::doundo() {
+if (chn==1){
+        Label1->Caption=pre;
+}
+if (chn==2){
+        Label2->Caption=pre;
+}
+if (chn==3){
+        Label3->Caption=pre;
+}
+if (chn==4){
+        Label4->Caption=pre;
+}
+chn=0;
+}
+
+//---------------------------------------------------------------------------
+__fastcall TForm2::TForm2(TComponent* Owner)
+        : TForm(Owner)
+{
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm2::FormKeyDown(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+       if ((Key>=37 && Key<=40) || (Key>=65 && Key<=90) || (Key>=48 && Key<=57)){
+        if (Key==37) inc='<';
+        else if (Key==38) inc='^';
+        else if (Key==39) inc='>';
+        else if (Key==40) inc='v';
+        else inc=(char)Key;
+        if (lu==Key || ld==Key || ru==Key || rd==Key) {
+                if (chn==1){
+                        Label1->Caption=(char)lu;
+                        if (lu==Key) Label1->Caption=inc;
+                }
+                if (chn==2){
+                        Label2->Caption=(char)ld;
+                        if (lu==Key) Label1->Caption=inc;
+                }
+                if (chn==3){
+                        Label3->Caption=(char)ru;
+                        if (lu==Key) Label1->Caption=inc;
+                }
+                if (chn==4){
+                        Label4->Caption=(char)rd;
+                        if (lu==Key) Label1->Caption=inc;
+                }
+                chn=0;
+        }
+        switch (chn) {
+        case 1: Label1->Caption=inc;
+                lu=Key;
+                break;
+        case 2: Label2->Caption=inc;
+                ld=Key;
+                break;
+        case 3: Label3->Caption=inc;
+                ru=Key;
+                break;
+        case 4: Label4->Caption=inc;
+                rd=Key;
+                break;
+        }
+        chn=0;
+       }
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm2::FormClose(TObject *Sender, TCloseAction &Action)
+{
+        if (chn!=0)
+        doundo();
+        Form1->SetControls(lu, ld, ru, rd);
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm2::Label1Click(TObject *Sender)
+{
+        if (chn!=0)
+        doundo();
+                chn=1;
+                pre=Label1->Caption;
+                Label1->Caption="---";
+
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm2::Label2Click(TObject *Sender)
+{
+        if (chn!=0)
+        doundo();
+                chn=2;
+                pre=Label2->Caption;
+                Label2->Caption="---";
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm2::Label3Click(TObject *Sender)
+{
+        if (chn!=0)
+        doundo();
+                chn=3;
+                pre=Label3->Caption;
+                Label3->Caption="---";
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm2::Label4Click(TObject *Sender)
+{
+        if (chn!=0)
+        doundo();
+                chn=4;
+                pre=Label4->Caption;
+                Label4->Caption="---";
+}
+//---------------------------------------------------------------------------
