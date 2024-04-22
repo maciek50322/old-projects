@@ -1,3 +1,5 @@
+# Connect game
+
 Project done using SFML with C++
 
 Connect 2 identical tiles, if shortest path between them has at most 2x 90 deg angles.

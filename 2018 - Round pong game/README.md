@@ -1,3 +1,5 @@
+# Round pong game
+
 Project done using "C++ builder" the end of high school
 
 Game has 2 players on a circle, you can assign your control for each player in settings.
